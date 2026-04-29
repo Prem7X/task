@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}TaskFlow{% endblock %} — TaskFlow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <span class="brand-icon">◈</span>
+    <span class="brand-name">TaskFlow</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="{{ url_for('index') }}" class="nav-item {% if request.endpoint == 'index' %}active{% endif %}">
+      <span class="nav-icon">⬡</span> Dashboard
+    </a>
+    <a href="{{ url_for('tasks') }}" class="nav-item {% if 'task' in (request.endpoint or '') %}active{% endif %}">
+      <span class="nav-icon">◻</span> Tasks
+    </a>
+    <a href="{{ url_for('categories') }}" class="nav-item {% if 'categor' in (request.endpoint or '') %}active{% endif %}">
+      <span class="nav-icon">◈</span> Categories
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="{{ url_for('create_task') }}" class="btn-new-task">+ New Task</a>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+  <div class="topbar">
+    <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+    <div class="topbar-actions">{% block topbar_actions %}{% endblock %}</div>
+  </div>
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for cat, msg in messages %}
+          <div class="flash flash-{{ cat }}">
+            <span>{{ msg }}</span>
+            <button onclick="this.parentElement.remove()">✕</button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <div class="content">
+    {% block content %}{% endblock %}
+  </div>
+</main>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
