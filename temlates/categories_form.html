@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit Category' if category else 'New Category' }}{% endblock %}
+{% block page_title %}{{ 'Edit Category' if category else 'New Category' }}{% endblock %}
+
+{% block content %}
+<div class="form-wrap">
+  <form method="post" class="form-card">
+    <div class="form-group">
+      <label class="label">Category Name <span class="required">*</span></label>
+      <input type="text" name="name" class="input"
+             value="{{ category.name if category else '' }}"
+             placeholder="e.g. Work, Personal, Shopping…" required autofocus>
+    </div>
+
+    <div class="form-group">
+      <label class="label">Color</label>
+      <div class="color-row">
+        <input type="color" name="color" class="color-input"
+               value="{{ category.color if category else '#6366f1' }}">
+        <div class="color-swatches">
+          {% for c in ['#ef4444','#f97316','#eab308','#22c55e','#10b981','#06b6d4','#3b82f6','#6366f1','#8b5cf6','#ec4899'] %}
+          <button type="button" class="swatch" style="background:{{ c }}" data-color="{{ c }}"></button>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('categories') }}" class="btn btn-ghost">Cancel</a>
+      <button type="submit" class="btn btn-primary">
+        {{ 'Save Changes' if category else 'Create Category' }}
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+document.querySelectorAll('.swatch').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelector('.color-input').value = btn.dataset.color;
+  });
+});
+</script>
+{% endblock %}
