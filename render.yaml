@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: taskflow
+    env: python
+    buildCommand: pip install -r requirments.
+    startCommand: gunicorn app:app
