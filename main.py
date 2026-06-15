@@ -55,6 +55,37 @@ class Task(db.Model):
         return False
 
 
+# ─── Database Initialization (Runs on both Local & Render) ─────────────────────
+
+def seed_data():
+    if Category.query.count() == 0:
+        colors = ['#ef4444', '#f97316', '#10b981', '#6366f1', '#8b5cf6']
+        names  = ['Work', 'Personal', 'Shopping', 'Health', 'Learning']
+        cats   = [Category(name=n, color=c) for n, c in zip(names, colors)]
+        db.session.add_all(cats)
+        db.session.flush()
+
+        samples = [
+            Task(title='Set up project repository', description='Initialize Git repo and push to GitHub.',
+                 priority='high', status='done', category_id=cats[0].id),
+            Task(title='Write unit tests', description='Cover all controller methods.',
+                 priority='high', status='in_progress', category_id=cats[0].id),
+            Task(title='Buy groceries', description='Milk, eggs, bread, fruits.',
+                 priority='medium', status='pending', category_id=cats[2].id),
+            Task(title='Morning run', description='5 km run before breakfast.',
+                 priority='low', status='pending', category_id=cats[3].id),
+            Task(title='Read Flask docs', description='Go through blueprints section.',
+                 priority='medium', status='pending', category_id=cats[4].id),
+        ]
+        db.session.add_all(samples)
+        db.session.commit()
+
+# This block forces table creation and seeding during Gunicorn startup on Render
+with app.app_context():
+    db.create_all()
+    seed_data()
+
+
 # ─── Routes: Home / Dashboard ──────────────────────────────────────────────────
 
 @app.route('/')
@@ -102,7 +133,6 @@ def tasks():
     elif sort == 'due':
         query = query.order_by(Task.due_date.asc().nullslast())
     elif sort == 'priority':
-        # high → medium → low
         from sqlalchemy import case
         priority_order = case(
             (Task.priority == 'high',   1),
@@ -268,34 +298,7 @@ def api_stats():
     })
 
 
-# ─── Init ──────────────────────────────────────────────────────────────────────
-
-def seed_data():
-    if Category.query.count() == 0:
-        colors = ['#ef4444', '#f97316', '#10b981', '#6366f1', '#8b5cf6']
-        names  = ['Work', 'Personal', 'Shopping', 'Health', 'Learning']
-        cats   = [Category(name=n, color=c) for n, c in zip(names, colors)]
-        db.session.add_all(cats)
-        db.session.flush()
-
-        samples = [
-            Task(title='Set up project repository', description='Initialize Git repo and push to GitHub.',
-                 priority='high', status='done', category_id=cats[0].id),
-            Task(title='Write unit tests', description='Cover all controller methods.',
-                 priority='high', status='in_progress', category_id=cats[0].id),
-            Task(title='Buy groceries', description='Milk, eggs, bread, fruits.',
-                 priority='medium', status='pending', category_id=cats[2].id),
-            Task(title='Morning run', description='5 km run before breakfast.',
-                 priority='low', status='pending', category_id=cats[3].id),
-            Task(title='Read Flask docs', description='Go through blueprints section.',
-                 priority='medium', status='pending', category_id=cats[4].id),
-        ]
-        db.session.add_all(samples)
-        db.session.commit()
-
+# ─── Local Development Run ─────────────────────────────────────────────────────
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        seed_data()
     app.run(debug=True, port=5000)
